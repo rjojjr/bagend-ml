@@ -144,7 +144,10 @@ namespace bagend_ml.ML
 
             var trainedModel = EvaluateModel(testData, new TrainedModel(model, null, modelName, stockTicker));
 
-            _eventPersistenceService.PostRecordedEvent(new OpenCloseMLModelCreateEvent());
+            _eventPersistenceService.PostRecordedEvent(new OpenCloseMLModelCreateEvent(modelName,
+                stockTicker,
+                "ClosingPrice",
+                trainedModel.GetCreationTimestamp()));
 
             return trainedModel;
         }
