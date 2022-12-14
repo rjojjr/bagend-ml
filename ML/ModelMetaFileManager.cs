@@ -18,7 +18,7 @@ namespace bagend_ml.ML
         public IList<ForcastingModelMeta> GetAllModelMeta()
         {
             var models = new List<ForcastingModelMeta>();
-            var filePaths = Directory.EnumerateFiles("/var/bagend-ml/models/meta/", "*.json.meta");
+            var filePaths = Directory.EnumerateFiles("/data/bagend-ml/models/meta/", "*.json.meta");
 
             foreach(string filePath in filePaths)
             {
@@ -45,7 +45,7 @@ namespace bagend_ml.ML
 
         private static string ConstructMetaFilePath(string modelName)
         {
-            return "/var/bagend-ml/models/meta/" + modelName + ".json.meta";
+            return "/data/bagend-ml/models/meta/" + modelName + ".json.meta";
         }
 
         private object GetOrCreateFileLock(string filePath)

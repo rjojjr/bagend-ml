@@ -98,12 +98,12 @@ namespace bagend_ml.ML
 
 		public string GetUniqueModelFilename()
 		{
-			return "/var/bagend-ml/models/trained/" + _modelName + "_" + _creationTimestamp.ToFileTime() + ".zip";
+			return "/data/bagend-ml/models/trained/" + _modelName + "_" + _creationTimestamp.ToFileTime() + ".zip";
 		}
 
         public string GetModelFilename()
         {
-            return "/var/bagend-ml/models/trained/" + _modelName + ".zip";
+            return "/data/bagend-ml/models/trained/" + _modelName + ".zip";
         }
     }
 }
