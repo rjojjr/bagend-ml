@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1704.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bagend-ml", "bagend-ml.csproj", "{34BDF89A-0B0E-4BF0-84CD-49F613D7EE9D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34BDF89A-0B0E-4BF0-84CD-49F613D7EE9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34BDF89A-0B0E-4BF0-84CD-49F613D7EE9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34BDF89A-0B0E-4BF0-84CD-49F613D7EE9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34BDF89A-0B0E-4BF0-84CD-49F613D7EE9D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A38CB6C6-C808-40BE-B49A-33B879CB9681}
+	EndGlobalSection
+EndGlobal
