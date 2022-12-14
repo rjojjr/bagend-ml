@@ -1,6 +1,7 @@
 ﻿using System;
 using bagend_ml.ML;
 using bagend_ml.Models;
+using bagend_ml.Util;
 using Microsoft.AspNetCore.Mvc;
 
 namespace bagend_ml.Controllers
@@ -37,6 +38,34 @@ namespace bagend_ml.Controllers
                 return Ok(new ModelMetaSearchResponse(metas.Count(), metas));
             });
             
+        }
+
+        /// <summary>
+        /// Get predictions for given model and date range.
+        /// </summary>
+        /// <remarks></remarks>
+        /// <response code="200">Success</response>
+        /// <response code="500">Something went wrong</response>
+        [HttpGet]
+        [Route("prediction")]
+        public IActionResult GetForcastedPredictions([FromQuery] string modelName = "", [FromQuery] string startDate = "", [FromQuery] string endDate = "")
+        {
+            if(startDate.Equals(""))
+            {
+                startDate = DateUtil.GetToday();
+            }
+            if (endDate.Equals(""))
+            {
+                endDate = DateUtil.GetToday();
+            }
+
+            return ExecuteWithExceptionHandler(() =>
+            {
+                _logger.LogInformation("received request to fetch all open/close ML model meta");
+                var predictions = _openCloseMLEngine.GetPredictions(startDate, endDate, modelName);
+                return Ok(predictions);
+            });
+
         }
 
         /// <summary>

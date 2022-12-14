@@ -7,6 +7,8 @@ namespace bagend_ml.ML
 	{
 		public DateTime LastUpdateTimestamp { get; set; }
         public DateTime ModelCreationTimestamp { get; set; }
+		public string LastDate { get; set; } = null!;
+        public string StockTicker { get; set; } = null!;
         public string ModelName { get; set; } = null!;
 		public string LatestModelFile { get; set; } = null!;
 		public ModelEvalResults ModelEvalResults { get; set; } = null!;
@@ -17,12 +19,16 @@ namespace bagend_ml.ML
 
         public ForcastingModelMeta(DateTime lastUpdateTimestamp,
 			DateTime modelCreationTimestamp,
+			string lastDate,
+            string stockTicker,
             string modelName,
 			string latestModelFile,
 			ModelEvalResults modelEvalResults)
         {
             LastUpdateTimestamp = lastUpdateTimestamp;
 			ModelCreationTimestamp = modelCreationTimestamp;
+			LastDate = lastDate;
+			StockTicker = stockTicker;
             ModelName = modelName;
             LatestModelFile = latestModelFile;
 			ModelEvalResults = modelEvalResults;

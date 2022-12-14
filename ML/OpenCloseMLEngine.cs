@@ -7,6 +7,7 @@ using bagend_ml.Util;
 using Microsoft.ML;
 using Microsoft.ML.TimeSeries;
 using Microsoft.ML.Transforms.TimeSeries;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace bagend_ml.ML
 {
@@ -50,15 +51,51 @@ namespace bagend_ml.ML
             return PersistModel(trainedModel, predictionEngine);
         }
 
-        public IList<ForcastingModelOutput> GetPredictions(int predictionCount, TrainedModel model)
+        public IList<Prediction> GetPredictions(string startDate, string endDate, string modelName)
+        {
+            var dates = DateUtil.GetDatesBetween(startDate, endDate);
+            return GetPredictions(dates, modelName);
+        }
+
+        private IList<Prediction> GetPredictions(IList<string> dates, string modelName)
+        {
+            _logger.LogInformation("getting forcast from model {} for dates between {} and {}", modelName, dates.First(), dates.Last());
+            var timer = Timer.Timer.TimerFactory(true);
+            var model = LoadTrainedModel(modelName);
+
+            var predictionsNeeded = DateUtil.GetNumberOfDaysBetween(model.LastDate, dates.Last());
+            var daysInRange = DateUtil.GetNumberOfDaysBetween(model.LastDate, dates.First());
+
+            _logger.LogDebug("daysInRange: {}, predictionsNeeded: {}", daysInRange, predictionsNeeded);
+
+            var inputs = new List<ForcastingModelInput>();
+            foreach(string date in dates)
+            {
+                var input = new ForcastingModelInput();
+                input.Date = DateUtil.GetDateTimeFromString(date);
+                inputs.Add(input);
+            }
+
+            var predictions = new List<Prediction>();
+            var prediction = new List<float>(GetPredictions(predictionsNeeded, model).ForecastedClosingPrice);
+            var wantedPredictions = prediction.GetRange(daysInRange - 1, prediction.Count());
+
+            _logger.LogWarning("dates: {}, wanted: {}", dates.Count(), wantedPredictions.Count());
+
+            for(int i = 0; i < wantedPredictions.Count(); i++)
+            {
+                predictions.Add(new Prediction(DateUtil.GetDateTimeFromString(dates[i]), wantedPredictions[i]));
+            }
+
+            _logger.LogInformation("finished getting forcast from model {} for dates between {} and {}, took {} millis", modelName, dates.First(), dates.Last(), timer.getTimeElasped());
+            return predictions;
+        }
+
+        private ForcastingModelOutput GetPredictions(int predictionCount, TrainedModel model)
         {
             var predictions = new List<ForcastingModelOutput>();
             var predictionEngine = GetForcastingEngine(model.GetModel());
-            for(int i = 1; i <= predictionCount; i++)
-            {
-                predictions.Add(predictionEngine.Predict());
-            }
-            return predictions;
+            return predictionEngine.Predict(horizon: predictionCount);
         }
 
         private TrainedModel PersistModel(TrainedModel model, TimeSeriesPredictionEngine<ForcastingModelInput,
@@ -98,7 +135,9 @@ namespace bagend_ml.ML
             return new TrainedModel(modelCopy,
                 modelMeta.ModelEvalResults,
                 modelName,
-                modelMeta.ModelCreationTimestamp);
+                modelMeta.ModelCreationTimestamp,
+                modelMeta.LastDate,
+                modelMeta.StockTicker);
         }
 
         private IList<ForcastingModelInput> BuildPredictionRequestInputs(IList<string> dates)
@@ -141,9 +180,12 @@ namespace bagend_ml.ML
             var trainingData = _stockOpenCloseDataLoader.FilterDataViewByYear(2021, wholeData);
             var testData = _stockOpenCloseDataLoader.FilterDataViewByYear(2022, wholeData);
 
+
+            var lastDate = _mlContextHolder.GetMLContext().Data.CreateEnumerable<ForcastingModelInput>(testData, false).Last().Date;
+
             ITransformer model = trainAndGetModel(trainingData, config);
 
-            var trainedModel = EvaluateModel(testData, new TrainedModel(model, null, modelName, stockTicker));
+            var trainedModel = EvaluateModel(testData, new TrainedModel(model, null, modelName, stockTicker, DateUtil.GetDateString(lastDate)));
 
             PersistModel(trainedModel, GetForcastingEngine(model));
 
@@ -202,6 +244,7 @@ namespace bagend_ml.ML
                 new ModelEvalResults((decimal)MAE, (decimal)RMSE),
                 model.GetModelName(),
                 model.GetCreationTimestamp(),
+                model.LastDate,
                 model.StockTicker);
         }
     }

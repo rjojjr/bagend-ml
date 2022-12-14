@@ -12,33 +12,24 @@ namespace bagend_ml.ML
 		private readonly string _modelName;
 		private readonly DateTime _creationTimestamp;
 		private readonly DateTime _lastInitalizedTimestamp;
+		public string LastDate { get; set; } = null!;
 		public string StockTicker { get; set; } = null!;
 
 		public TrainedModel(ITransformer model,
             ModelEvalResults modelEvalResults,
 			string modelName,
-			DateTime creationTimestamp)
+			DateTime creationTimestamp,
+            string lastDate,
+			string stockTicker)
 		{
 			_model = model;
 			_modelEvalResults = modelEvalResults;
 			_modelName = modelName;
 			_creationTimestamp = creationTimestamp;
 			_lastInitalizedTimestamp = DateTime.UtcNow;
-		}
-
-        public TrainedModel(ITransformer model,
-            ModelEvalResults modelEvalResults,
-            string modelName,
-            DateTime creationTimestamp,
-			string stockTicker)
-        {
-            _model = model;
-            _modelEvalResults = modelEvalResults;
-            _modelName = modelName;
-            _creationTimestamp = creationTimestamp;
-            _lastInitalizedTimestamp = DateTime.UtcNow;
+			LastDate = lastDate;
 			StockTicker = stockTicker;
-        }
+		}
 
         public TrainedModel(ITransformer model,
             ModelEvalResults modelEvalResults,
@@ -55,7 +46,8 @@ namespace bagend_ml.ML
         public TrainedModel(ITransformer model,
             ModelEvalResults modelEvalResults,
             string modelName,
-			string stockTicker)
+			string stockTicker,
+			string lastDate)
         {
             var now = DateTime.UtcNow;
             _model = model;
@@ -64,12 +56,15 @@ namespace bagend_ml.ML
             _creationTimestamp = now;
             _lastInitalizedTimestamp = now;
 			StockTicker = stockTicker;
+			LastDate = lastDate;
         }
 
 		public ForcastingModelMeta GetModelMeta()
 		{
 			return new ForcastingModelMeta(_lastInitalizedTimestamp,
 				_creationTimestamp,
+				LastDate,
+				StockTicker,
 				_modelName,
 				GetModelFilename(),
 				_modelEvalResults);

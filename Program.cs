@@ -3,6 +3,7 @@ using bagend_ml.Client;
 using bagend_ml.Config;
 using bagend_ml.ML;
 using bagend_ml.ML.Training;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,10 +21,26 @@ builder.Services.AddSingleton<Executor>();
 builder.Services.AddSingleton<EventPersistenceService>();
 builder.Services.AddSingleton<ModelMetaFileManager>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.SuppressConsumesConstraintForFormFileParameters = true;
+        options.SuppressInferBindingSourcesForParameters = true;
+        options.SuppressModelStateInvalidFilter = true;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "bagend ML API",
+        Description = "A dotnet application to manage ML"
+    });
+    var filePath = Path.Combine(System.AppContext.BaseDirectory, "bagend-ml.xml");
+    options.IncludeXmlComments(filePath);
+});
 
 var app = builder.Build();
 

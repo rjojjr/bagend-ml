@@ -55,6 +55,11 @@ namespace bagend_ml.ML.Training
             return _mlContextHolder.GetMLContext().Data.FilterRowsByColumn(dataView, "Year", upperBound: year + 1, lowerBound: year);
         }
 
+		public IDataView BuildDataView(IList<ForcastingModelInput> inputs)
+		{
+			return _mlContextHolder.GetMLContext().Data.LoadFromEnumerable<ForcastingModelInput>(inputs);
+        }
+
         private void loadData(string stockTicker)
 		{
 			var events = getEvents(stockTicker);
