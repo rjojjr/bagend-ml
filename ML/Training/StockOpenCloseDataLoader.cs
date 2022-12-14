@@ -42,7 +42,7 @@ namespace bagend_ml.ML.Training
 
             _logger.LogInformation("done loading open/close training data, took {} millis", timer.getTimeElasped());
 
-			return dataView;
+            return dataView;
         }
 
 		public IDataView GetLatestTrainingData(string stockTicker)

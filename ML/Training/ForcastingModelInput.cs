@@ -9,11 +9,12 @@ namespace bagend_ml.ML.Training
         public DateTime Date { get; set; }
 
 		[ColumnName("ClosingPrice")]
-		public decimal ClosingPrice { get; set; } = 0;
-		public decimal AfterHoursClosingPrice { get; set; } = 0;
-        public decimal High { get; set; } = 0;
-        public decimal Low { get; set; } = 0;
-        public int Year { get; set; } = 0;
+		public float ClosingPrice { get; set; } = 0;
+		public float AfterHoursClosingPrice { get; set; } = 0;
+        public float High { get; set; } = 0;
+        public float Low { get; set; } = 0;
+        [ColumnName("Year")]
+        public float Year { get; set; } = 0;
 
         public ForcastingModelInput()
 		{

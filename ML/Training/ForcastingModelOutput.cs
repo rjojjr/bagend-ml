@@ -3,14 +3,14 @@ namespace bagend_ml.ML.Training
 {
 	public class ForcastingModelOutput
 	{
-        public decimal[] ForecastedClosingPrice { get; set; }
-        public decimal[] ForecastedAfterHoursClosingPrice { get; set; }
-        public decimal[] ForecastedHigh { get; set; }
-        public decimal[] ForecastedLow { get; set; }
+        public float[] ForecastedClosingPrice { get; set; }
+        //public float[] ForecastedAfterHoursClosingPrice { get; set; }
+        //public float[] ForecastedHigh { get; set; }
+        //public float[] ForecastedLow { get; set; }
 
-        public decimal[] LowerBoundClosingPrice { get; set; }
+        public float[] LowerBoundClosingPrice { get; set; }
 
-        public decimal[] UpperBoundClosingPrice { get; set; }
+        public float[] UpperBoundClosingPrice { get; set; }
 	}
 }
 

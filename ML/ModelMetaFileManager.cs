@@ -117,7 +117,11 @@ namespace bagend_ml.ML
         {
             lock (GetOrCreateFileLock(filePath))
             {
-                File.WriteAllText(filePath, contents);
+                var path = System.IO.Path.GetFullPath(filePath);
+                var file = System.IO.File.Create(path);
+                var fileWriter = new System.IO.StreamWriter(file);
+                fileWriter.WriteLine(contents);
+                fileWriter.Dispose();
             }
         }
 	}

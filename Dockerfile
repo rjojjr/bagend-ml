@@ -20,4 +20,5 @@ RUN dotnet publish "bagend-ml.csproj" -c Release -o /app/publish /p:UseAppHost=f
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "bagend-ml.dll"]

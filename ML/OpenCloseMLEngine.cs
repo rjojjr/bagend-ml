@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Reflection;
 using bagend_ml.ML.Training;
 using bagend_ml.Models.ExternalEvents;
@@ -128,7 +129,7 @@ namespace bagend_ml.ML
         {
             var config = new ForcastingPipelineConfig("ForecastedClosingPrice",
                     "ClosingPrice",
-                    1,
+                    2,
                     7,
                     7,
                     0.95f,
@@ -143,6 +144,8 @@ namespace bagend_ml.ML
             ITransformer model = trainAndGetModel(trainingData, config);
 
             var trainedModel = EvaluateModel(testData, new TrainedModel(model, null, modelName, stockTicker));
+
+            PersistModel(trainedModel, GetForcastingEngine(model));
 
             _eventPersistenceService.PostRecordedEvent(new OpenCloseMLModelCreateEvent(modelName,
                 stockTicker,
@@ -168,7 +171,8 @@ namespace bagend_ml.ML
 
         private SsaForecastingTransformer trainAndGetModel(IDataView dataView, ForcastingPipelineConfig config)
         {
-            return dataView != null ? BuildClosePriceForcastingPipeline((int)dataView.GetRowCount(), config).Fit(dataView) : null;
+            var count = dataView.Preview().RowView.ToList().Count();
+            return BuildClosePriceForcastingPipeline(count, config).Fit(dataView);
         }
 
 
@@ -177,11 +181,11 @@ namespace bagend_ml.ML
         {
             _logger.LogInformation("Evaluating ML Model");
             IDataView predictions = model.GetModel().Transform(testData);
-            IEnumerable<decimal> actual =
+            IEnumerable<float> actual =
                     _mlContextHolder.GetMLContext().Data.CreateEnumerable<ForcastingModelInput>(testData, true)
                         .Select(observed => observed.ClosingPrice);
 
-            IEnumerable<decimal> forecast =
+            IEnumerable<float> forecast =
                 _mlContextHolder.GetMLContext().Data.CreateEnumerable<ForcastingModelOutput>(predictions, true)
                     .Select(prediction => prediction.ForecastedClosingPrice[0]);
 
@@ -195,7 +199,7 @@ namespace bagend_ml.ML
             _logger.LogInformation("Root Mean Squared Error: {}", RMSE);
 
             return new TrainedModel(model.GetModel(),
-                new ModelEvalResults(MAE, (decimal)RMSE),
+                new ModelEvalResults((decimal)MAE, (decimal)RMSE),
                 model.GetModelName(),
                 model.GetCreationTimestamp(),
                 model.StockTicker);

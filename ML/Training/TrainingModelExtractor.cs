@@ -25,7 +25,7 @@ namespace bagend_ml.ML.Training
 				models.Add(model);
 			}
 
-            _logger.LogInformation("extracted {} forcasting training models, took {} millis", genericEvents.Count(), timer.getTimeElasped());
+            _logger.LogInformation("extracted {} forcasting training models, took {} millis", models.Count(), timer.getTimeElasped());
             return models;
 		}
 
@@ -33,10 +33,10 @@ namespace bagend_ml.ML.Training
 		{
 			var date = DateUtil.GetDateTimeFromString(extractEventAttribute("Date", genericEvent));
             var model = new ForcastingModelInput();
-			model.ClosingPrice = decimal.Parse(extractEventAttribute("Close", genericEvent));
-			model.AfterHoursClosingPrice = decimal.Parse(extractEventAttribute("AfterHours", genericEvent));
-            model.High = decimal.Parse(extractEventAttribute("High", genericEvent));
-            model.Low = decimal.Parse(extractEventAttribute("Low", genericEvent));
+			model.ClosingPrice = float.Parse(extractEventAttribute("Close", genericEvent));
+			model.AfterHoursClosingPrice = float.Parse(extractEventAttribute("AfterHours", genericEvent));
+            model.High = float.Parse(extractEventAttribute("High", genericEvent));
+            model.Low = float.Parse(extractEventAttribute("Low", genericEvent));
 			model.Date = date;
 			model.Year = date.Year;
 
