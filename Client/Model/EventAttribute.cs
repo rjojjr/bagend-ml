@@ -15,6 +15,11 @@ namespace bagend_ml.Client.Model
 			this.EventAttributeName = eventAttributeName;
             this.EventAttributeValue = new DefaultEventAttributeValue(eventAttributeValue);
 		}
+
+        public EventAttribute()
+        {
+
+        }
 	}
 }
 
