@@ -9,10 +9,13 @@ namespace bagend_ml.ML
 	{
 
         private readonly ConcurrentDictionary<string, object> _fileLocks;
+        private readonly ILogger<ModelMetaFileManager> _logger;
 
-        public ModelMetaFileManager()
+        public ModelMetaFileManager(ILogger<ModelMetaFileManager> logger)
 		{
+            _logger = logger;
             _fileLocks = new ConcurrentDictionary<string, object>();
+            makeDirs();
 		}
 
         public IList<ForcastingModelMeta> GetAllModelMeta()
@@ -41,6 +44,24 @@ namespace bagend_ml.ML
         {
             WriteFile(ConstructMetaFilePath(forcastingModelMeta.ModelName),
                 forcastingModelMeta.toJson());
+        }
+
+        private void makeDirs()
+        {
+            var metaDir = "/data/bagend-ml/models/meta/";
+            var trainedDir = "/data/bagend-ml/models/trained/";
+
+            if (!File.Exists(metaDir))
+            {
+                _logger.LogInformation("creating dir {}", metaDir);
+                Directory.CreateDirectory(metaDir);
+            }
+
+            if (!File.Exists(trainedDir))
+            {
+                _logger.LogInformation("creating dir {}", trainedDir);
+                Directory.CreateDirectory(trainedDir);
+            }
         }
 
         private static string ConstructMetaFilePath(string modelName)
