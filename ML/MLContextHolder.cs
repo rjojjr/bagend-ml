@@ -7,9 +7,9 @@ namespace bagend_ml.ML
 
 		private readonly MLContext _mLContext;
 
-		public MLContextHolder(MLContext mLContext)
+		public MLContextHolder()
 		{
-			_mLContext = mLContext;
+			_mLContext = new MLContext();
 		}
 
 		public MLContext GetMLContext()
