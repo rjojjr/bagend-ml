@@ -8,7 +8,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["bagend-web-scraper.csproj", "."]
+COPY ["bagend-ml.csproj", "."]
 RUN dotnet restore "./bagend-ml.csproj"
 COPY . .
 WORKDIR "/src/."
