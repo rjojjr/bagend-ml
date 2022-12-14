@@ -1,4 +1,5 @@
-﻿using bagend_ml.Client;
+﻿using bagend_ml;
+using bagend_ml.Client;
 using bagend_ml.Config;
 using bagend_ml.ML;
 using bagend_ml.ML.Training;
@@ -15,6 +16,9 @@ builder.Services.AddSingleton<MLContextHolder>();
 builder.Services.AddSingleton<TrainingModelExtractor>();
 builder.Services.AddSingleton<StockOpenCloseDataLoader>();
 builder.Services.AddSingleton<OpenCloseMLEngine>();
+builder.Services.AddSingleton<Executor>();
+builder.Services.AddSingleton<EventPersistenceService>();
+builder.Services.AddSingleton<ModelMetaFileManager>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

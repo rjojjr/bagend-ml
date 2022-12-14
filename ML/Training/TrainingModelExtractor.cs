@@ -1,5 +1,6 @@
 ﻿using System;
 using bagend_ml.Client.Model;
+using bagend_ml.Util;
 
 namespace bagend_ml.ML.Training
 {
@@ -29,7 +30,7 @@ namespace bagend_ml.ML.Training
 
 		private ForcastingModelInput ExtractModelFromEvent(GenericEvent genericEvent)
 		{
-			var date = GetDateTimeFromString(extractEventAttribute("Date", genericEvent));
+			var date = DateUtil.GetDateTimeFromString(extractEventAttribute("Date", genericEvent));
             var model = new ForcastingModelInput();
 			model.ClosingPrice = decimal.Parse(extractEventAttribute("Close", genericEvent));
 			model.AfterHoursClosingPrice = decimal.Parse(extractEventAttribute("AfterHours", genericEvent));
@@ -52,8 +53,6 @@ namespace bagend_ml.ML.Training
             }
             return null;
         }
-
-        private
     }
 }
 
