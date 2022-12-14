@@ -21,7 +21,8 @@ namespace bagend_ml.ML.Training
 			var models = new List<ForcastingModelInput>();
 			foreach(GenericEvent genericEvent in genericEvents)
 			{
-				models.Add(ExtractModelFromEvent(genericEvent));
+				var model = ExtractModelFromEvent(genericEvent);
+				models.Add(model);
 			}
 
             _logger.LogInformation("extracted {} forcasting training models, took {} millis", genericEvents.Count(), timer.getTimeElasped());

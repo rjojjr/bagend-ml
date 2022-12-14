@@ -1,10 +1,14 @@
 ﻿using System;
+using Microsoft.ML.Data;
+
 namespace bagend_ml.ML.Training
 {
 	public class ForcastingModelInput
 	{
 
         public DateTime Date { get; set; }
+
+		[ColumnName("ClosingPrice")]
 		public decimal ClosingPrice { get; set; } = 0;
 		public decimal AfterHoursClosingPrice { get; set; } = 0;
         public decimal High { get; set; } = 0;
