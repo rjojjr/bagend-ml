@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Text;
+using bagend_ml.ML.MLModels;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace bagend_ml.ML
@@ -18,43 +19,74 @@ namespace bagend_ml.ML
             makeDirs();
 		}
 
-        public IList<ForcastingModelMeta> GetAllModelMeta()
+        public IList<T> GetAllModelMeta<T>()
         {
-            var models = new List<ForcastingModelMeta>();
-            var filePaths = Directory.EnumerateFiles("/data/bagend-ml/models/meta/", "*.json.meta");
+            var isCollective = typeof(T) == typeof(CollectiveMLModelMeta);
+            var fileDir = !isCollective
+                ? "/data/bagend-ml/models/meta/"
+                : "/data/bagend-ml/models/meta/collective/";
+            var models = new List<T>();
+            var filePaths = Directory.EnumerateFiles(fileDir, "*.json.meta");
 
             foreach(string filePath in filePaths)
             {
                 var urlParts = filePath.Split("/");
                 var modelName = urlParts[urlParts.Length - 1].Split(".json.meta")[0];
 
-                models.Add(GetMeta(modelName));
+                models.Add(GetMeta<T>(modelName));
             }
 
             return models;
         }
 
-        public ForcastingModelMeta GetMeta(string modelName)
+        public T? GetMeta<T>(string modelName)
         {
-            var json = ReadFile(ConstructMetaFilePath(modelName));
-            return json != null ? ForcastingModelMeta.FromJson(json) : null;
+            var isCollective = typeof(T) == typeof(CollectiveMLModelMeta);
+            var json = ReadFile(ConstructMetaFilePath(modelName, isCollective));
+            return json != null
+                ? (isCollective
+                    ? (T)Convert.ChangeType(CollectiveMLModelMeta.FromJson(json), typeof(T))
+                    : (T)Convert.ChangeType(ForcastingModelMeta.FromJson(json), typeof(T)))
+                : default;
         }
 
-        public void WriteMeta(ForcastingModelMeta forcastingModelMeta)
+        public CollectiveMLModelMeta? GetCollectiveMeta(string modelName)
         {
-            WriteFile(ConstructMetaFilePath(forcastingModelMeta.ModelName),
+            var json = ReadFile(ConstructMetaFilePath(modelName, true));
+            return json != null ? CollectiveMLModelMeta.FromJson(json) : null;
+        }
+
+        public void WriteMeta(IMLMeta meta)
+        {
+            var isCollective = meta is CollectiveMLModelMeta;
+            WriteFile(ConstructMetaFilePath(meta.getName()),
+                meta.toJson());
+        }
+
+        public void WriteMeta(CollectiveMLModelMeta forcastingModelMeta)
+        {
+            WriteFile(ConstructMetaFilePath(forcastingModelMeta.CollectiveModelName, true),
                 forcastingModelMeta.toJson());
         }
+
+
 
         private void makeDirs()
         {
             var metaDir = "/data/bagend-ml/models/meta/";
+            var collectiveMetaDir = "/data/bagend-ml/models/meta/collective";
             var trainedDir = "/data/bagend-ml/models/trained/";
 
             if (!File.Exists(metaDir))
             {
                 _logger.LogInformation("creating dir {}", metaDir);
                 Directory.CreateDirectory(metaDir);
+            }
+
+            if (!File.Exists(collectiveMetaDir))
+            {
+                _logger.LogInformation("creating dir {}", collectiveMetaDir);
+                Directory.CreateDirectory(collectiveMetaDir);
             }
 
             if (!File.Exists(trainedDir))
@@ -64,9 +96,11 @@ namespace bagend_ml.ML
             }
         }
 
-        private static string ConstructMetaFilePath(string modelName)
+        private static string ConstructMetaFilePath(string modelName, bool isCollective = false)
         {
-            return "/data/bagend-ml/models/meta/" + modelName + ".json.meta";
+            return isCollective
+                ? "/data/bagend-ml/models/meta/collective/" + modelName + ".json.meta"
+                : "/data/bagend-ml/models/meta/" + modelName + ".json.meta";
         }
 
         private object GetOrCreateFileLock(string filePath)
@@ -85,7 +119,7 @@ namespace bagend_ml.ML
             return value;
         }
 
-		private string ReadFile(string filePath)
+		private string? ReadFile(string filePath)
 		{
             Func<string> readFile = () =>
             {

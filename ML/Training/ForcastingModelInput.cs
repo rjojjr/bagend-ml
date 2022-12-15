@@ -16,6 +16,14 @@ namespace bagend_ml.ML.Training
         [ColumnName("Year")]
         public float Year { get; set; } = 0;
 
+        public readonly static IList<string> PropertyList = new List<string>(new string[]
+        {
+            "ClosingPrice",
+            "AfterHoursClosingPrice",
+            "High",
+            "Low"
+        });
+
         public ForcastingModelInput()
 		{
 		}

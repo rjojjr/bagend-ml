@@ -51,17 +51,23 @@ namespace bagend_ml.ML
             return PersistModel(trainedModel, predictionEngine);
         }
 
+        public IList<Prediction> GetPredictions(string startDate, string endDate, TrainedModel model)
+        {
+            var dates = DateUtil.GetDatesBetween(startDate, endDate);
+            return GetPredictions(dates, trainedModel: model);
+        }
+
         public IList<Prediction> GetPredictions(string startDate, string endDate, string modelName)
         {
             var dates = DateUtil.GetDatesBetween(startDate, endDate);
             return GetPredictions(dates, modelName);
         }
 
-        private IList<Prediction> GetPredictions(IList<string> dates, string modelName)
+        private IList<Prediction> GetPredictions(IList<string> dates, string modelName = "", TrainedModel trainedModel = default(TrainedModel))
         {
             _logger.LogInformation("getting forcast from model {} for dates between {} and {}", modelName, dates.First(), dates.Last());
             var timer = Timer.Timer.TimerFactory(true);
-            var model = LoadTrainedModel(modelName);
+            var model = trainedModel.Equals(default(TrainedModel)) ? _loadTrainedModel(modelName) : trainedModel;
 
             var predictionsNeeded = DateUtil.GetNumberOfDaysBetween(model.LastDate, dates.Last());
             var daysInRange = DateUtil.GetNumberOfDaysBetween(model.LastDate, dates.First());
@@ -84,7 +90,7 @@ namespace bagend_ml.ML
 
             for(int i = 0; i < wantedPredictions.Count(); i++)
             {
-                predictions.Add(new Prediction(DateUtil.GetDateTimeFromString(dates[i]), wantedPredictions[i]));
+                predictions.Add(new Prediction(DateUtil.GetDateTimeFromString(dates[i]), wantedPredictions[i], model.ForcastedProperty));
             }
 
             _logger.LogInformation("finished getting forcast from model {} for dates between {} and {}, took {} millis", modelName, dates.First(), dates.Last(), timer.getTimeElasped());
@@ -98,6 +104,7 @@ namespace bagend_ml.ML
             return predictionEngine.Predict(horizon: predictionCount);
         }
 
+
         private TrainedModel PersistModel(TrainedModel model, TimeSeriesPredictionEngine<ForcastingModelInput,
                 ForcastingModelOutput> timeSeriesPredictionEngine)
         {
@@ -107,7 +114,7 @@ namespace bagend_ml.ML
             _logger.LogInformation($"persisted model {model.GetModelName()}, took {timer.getTimeElasped()} millis");
             UpdateModelMeta(model);
 
-            return LoadTrainedModel(model.GetModelName());
+            return _loadTrainedModel(model.GetModelName());
         }
 
         private void UpdateModelMeta(TrainedModel model)
@@ -117,11 +124,16 @@ namespace bagend_ml.ML
             _modelMetaFileManager.WriteMeta(meta);
         }
 
-        private TrainedModel LoadTrainedModel(string modelName)
+        public TrainedModel LoadTrainedModel(string modelName)
+        {
+            return _loadTrainedModel(modelName);
+        }
+
+        private TrainedModel _loadTrainedModel(string modelName)
         {
             _logger.LogInformation("loading model {}", modelName);
             var timer = Timer.Timer.TimerFactory(true);
-            var modelMeta = _modelMetaFileManager.GetMeta(modelName);
+            var modelMeta = _modelMetaFileManager.GetMeta<ForcastingModelMeta>(modelName);
             if(modelMeta == null)
             {
                 _logger.LogWarning("failed to load model {} because there is no meta record for it", modelName);

@@ -38,6 +38,7 @@
     <None Remove="Microsoft.ML.Mkl.Redist" />
     <None Remove="Microsoft.ML.Mkl.Components" />
     <None Remove="MKL.NET.linux-x64" />
+    <None Remove="ML\MLModels\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ML\" />
@@ -47,5 +48,6 @@
     <Folder Include="Controllers\" />
     <Folder Include="Models\" />
     <Folder Include="Models\ExternalEvents\" />
+    <Folder Include="ML\MLModels\" />
   </ItemGroup>
 </Project>

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Text.Json;
+using bagend_ml.ML.MLModels;
 
 namespace bagend_ml.ML
 {
-	public class ForcastingModelMeta
-	{
+	public class ForcastingModelMeta : IMLMeta
+    {
 		public DateTime LastUpdateTimestamp { get; set; }
         public DateTime ModelCreationTimestamp { get; set; }
 		public string LastDate { get; set; } = null!;
@@ -39,6 +40,11 @@ namespace bagend_ml.ML
             ForcastedProperty = forcastedProperty;
 			WindowSize = windowSize;
         }
+
+		public string getName()
+		{
+			return ModelName;
+		}
 
         public string toJson()
 		{
