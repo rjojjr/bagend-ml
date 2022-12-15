@@ -11,6 +11,8 @@ namespace bagend_ml.ML
             this.MeanAbsoluteError = MeanAbsoluteError;
             this.RootMeanSquaredError = RootMeanSquaredError;
         }
+
+        public ModelEvalResults() { }
     }
 }
 

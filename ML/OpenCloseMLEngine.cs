@@ -77,7 +77,7 @@ namespace bagend_ml.ML
             }
 
             var predictions = new List<Prediction>();
-            var prediction = new List<float>(GetPredictions(predictionsNeeded, model).ForecastedClosingPrice);
+            var prediction = new List<float>(GetPredictions(predictionsNeeded, model).Forcasts);
             var wantedPredictions = prediction.GetRange(daysInRange - 1, prediction.Count());
 
             _logger.LogWarning("dates: {}, wanted: {}", dates.Count(), wantedPredictions.Count());
@@ -137,7 +137,9 @@ namespace bagend_ml.ML
                 modelName,
                 modelMeta.ModelCreationTimestamp,
                 modelMeta.LastDate,
-                modelMeta.StockTicker);
+                modelMeta.StockTicker,
+                modelMeta.ForcastedProperty,
+                modelMeta.WindowSize);
         }
 
         private IList<ForcastingModelInput> BuildPredictionRequestInputs(IList<string> dates)
@@ -164,16 +166,16 @@ namespace bagend_ml.ML
             return engine;
         }
 
-        public TrainedModel BuildTrainAndEvaluateModel(string stockTicker, string modelName)
+        public TrainedModel BuildTrainAndEvaluateModel(string stockTicker, string forcastedProperty, string modelName, int windowSize)
         {
-            var config = new ForcastingPipelineConfig("ForecastedClosingPrice",
-                    "ClosingPrice",
-                    2,
-                    7,
+            var config = new ForcastingPipelineConfig("Forcasts",
+                    forcastedProperty,
+                    windowSize,
+                    16,
                     7,
                     0.95f,
-                    "LowerBoundClosingPrice",
-                    "UpperBoundClosingPrice"
+                    "ForcastLowerBound",
+                    "ForcastUpperBound"
                 );
             var wholeData = _stockOpenCloseDataLoader.GetMasterDataView(stockTicker);
 
@@ -185,13 +187,13 @@ namespace bagend_ml.ML
 
             ITransformer model = trainAndGetModel(trainingData, config);
 
-            var trainedModel = EvaluateModel(testData, new TrainedModel(model, null, modelName, stockTicker, DateUtil.GetDateString(lastDate)));
+            var trainedModel = EvaluateModel(testData, new TrainedModel(model, new ModelEvalResults(), modelName, stockTicker, DateUtil.GetDateString(lastDate), forcastedProperty, windowSize));
 
             PersistModel(trainedModel, GetForcastingEngine(model));
 
             _eventPersistenceService.PostRecordedEvent(new OpenCloseMLModelCreateEvent(modelName,
                 stockTicker,
-                "ClosingPrice",
+                forcastedProperty,
                 trainedModel.GetCreationTimestamp()));
 
             return trainedModel;
@@ -229,7 +231,7 @@ namespace bagend_ml.ML
 
             IEnumerable<float> forecast =
                 _mlContextHolder.GetMLContext().Data.CreateEnumerable<ForcastingModelOutput>(predictions, true)
-                    .Select(prediction => prediction.ForecastedClosingPrice[0]);
+                    .Select(prediction => prediction.Forcasts[0]);
 
             var metrics = actual.Zip(forecast, (actualValue, forecastValue) => actualValue - forecastValue);
 
@@ -245,7 +247,9 @@ namespace bagend_ml.ML
                 model.GetModelName(),
                 model.GetCreationTimestamp(),
                 model.LastDate,
-                model.StockTicker);
+                model.StockTicker,
+                model.ForcastedProperty,
+                model.WindowSize);
         }
     }
 }

@@ -11,7 +11,9 @@ namespace bagend_ml.ML
         public string StockTicker { get; set; } = null!;
         public string ModelName { get; set; } = null!;
 		public string LatestModelFile { get; set; } = null!;
-		public ModelEvalResults ModelEvalResults { get; set; } = null!;
+        public string ForcastedProperty { get; set; } = null!;
+		public int WindowSize { get; set; }
+        public ModelEvalResults ModelEvalResults { get; set; } = null!;
 
         public ForcastingModelMeta()
 		{
@@ -23,7 +25,9 @@ namespace bagend_ml.ML
             string stockTicker,
             string modelName,
 			string latestModelFile,
-			ModelEvalResults modelEvalResults)
+			ModelEvalResults modelEvalResults,
+            string forcastedProperty,
+			int windowSize)
         {
             LastUpdateTimestamp = lastUpdateTimestamp;
 			ModelCreationTimestamp = modelCreationTimestamp;
@@ -32,6 +36,8 @@ namespace bagend_ml.ML
             ModelName = modelName;
             LatestModelFile = latestModelFile;
 			ModelEvalResults = modelEvalResults;
+            ForcastedProperty = forcastedProperty;
+			WindowSize = windowSize;
         }
 
         public string toJson()

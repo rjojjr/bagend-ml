@@ -14,13 +14,17 @@ namespace bagend_ml.ML
 		private readonly DateTime _lastInitalizedTimestamp;
 		public string LastDate { get; set; } = null!;
 		public string StockTicker { get; set; } = null!;
+        public int WindowSize { get; set; } = 2;
+        public string ForcastedProperty { get; set; } = null!;
 
 		public TrainedModel(ITransformer model,
             ModelEvalResults modelEvalResults,
 			string modelName,
 			DateTime creationTimestamp,
             string lastDate,
-			string stockTicker)
+			string stockTicker,
+            string forcastedProperty,
+			int windowSize)
 		{
 			_model = model;
 			_modelEvalResults = modelEvalResults;
@@ -29,11 +33,15 @@ namespace bagend_ml.ML
 			_lastInitalizedTimestamp = DateTime.UtcNow;
 			LastDate = lastDate;
 			StockTicker = stockTicker;
+			ForcastedProperty = forcastedProperty;
+			WindowSize = windowSize;
 		}
 
         public TrainedModel(ITransformer model,
             ModelEvalResults modelEvalResults,
-            string modelName)
+            string modelName,
+            string forcastedProperty,
+            int windowSize)
         {
 			var now = DateTime.UtcNow;
             _model = model;
@@ -41,13 +49,17 @@ namespace bagend_ml.ML
             _modelName = modelName;
 			_creationTimestamp = now;
             _lastInitalizedTimestamp = now;
+            ForcastedProperty = forcastedProperty;
+            WindowSize = windowSize;
         }
 
         public TrainedModel(ITransformer model,
             ModelEvalResults modelEvalResults,
             string modelName,
 			string stockTicker,
-			string lastDate)
+			string lastDate,
+			string forcastedProperty,
+            int windowSize)
         {
             var now = DateTime.UtcNow;
             _model = model;
@@ -57,6 +69,8 @@ namespace bagend_ml.ML
             _lastInitalizedTimestamp = now;
 			StockTicker = stockTicker;
 			LastDate = lastDate;
+            ForcastedProperty = forcastedProperty;
+            WindowSize = windowSize;
         }
 
 		public ForcastingModelMeta GetModelMeta()
@@ -67,7 +81,9 @@ namespace bagend_ml.ML
 				StockTicker,
 				_modelName,
 				GetModelFilename(),
-				_modelEvalResults);
+				_modelEvalResults,
+				ForcastedProperty,
+				WindowSize);
 		}
 
 

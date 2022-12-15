@@ -69,7 +69,7 @@ namespace bagend_ml.Controllers
         }
 
         /// <summary>
-        /// Builds new open/close ML model.
+        /// Builds and trains new open/close ML model.
         /// </summary>
         /// <remarks></remarks>
         /// <response code="201">Open/Close ML model created</response>
@@ -79,8 +79,8 @@ namespace bagend_ml.Controllers
         {
             return ExecuteWithExceptionHandler(() =>
             {
-                _logger.LogInformation("received request to build open/close ML model {} for ticker {}", request.ModelName, request.StockTicker);
-                return Created(".", _openCloseMLEngine.BuildTrainAndEvaluateModel(request.StockTicker, request.ModelName).GetModelMeta());
+                _logger.LogInformation("received request to build open/close ML model {} for ticker {} property {}", request.ModelName, request.StockTicker, request.ForcastedProperty);
+                return Created(".", _openCloseMLEngine.BuildTrainAndEvaluateModel(request.StockTicker, request.ForcastedProperty, request.ModelName, request.WindowSize).GetModelMeta());
             });
         }
     }
