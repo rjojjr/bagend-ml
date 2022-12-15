@@ -74,7 +74,7 @@ namespace bagend_ml.Controllers
         /// <response code="500">Something went wrong</response>
         [HttpPost]
         [Route("collective/deep")]
-        public IActionResult CreateCollectiveModel(DeepCreateCollectiveModelRequest request)
+        public IActionResult CreateCollectiveModel([FromBody] DeepCreateCollectiveModelRequest request)
         {
             return ExecuteWithExceptionHandler(() =>
             {
@@ -92,7 +92,7 @@ namespace bagend_ml.Controllers
         /// <response code="500">Something went wrong</response>
         [HttpPost]
         [Route("collective")]
-        public IActionResult CreateCollectiveModel(CreateCollectiveModelRequest request)
+        public IActionResult CreateCollectiveModel([FromBody] CreateCollectiveModelRequest request)
         {
             return ExecuteWithExceptionHandler(() =>
             {
@@ -165,7 +165,7 @@ namespace bagend_ml.Controllers
         /// <response code="201">Open/Close ML model created</response>
         /// <response code="500">Something went wrong</response>
         [HttpPost]
-        public IActionResult BuildNewMLModel(CreateOpenCloseMLModelRequest request)
+        public IActionResult BuildNewMLModel([FromBody] CreateOpenCloseMLModelRequest request)
         {
             return ExecuteWithExceptionHandler(() =>
             {
