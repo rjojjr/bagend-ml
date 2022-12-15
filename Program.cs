@@ -2,6 +2,7 @@
 using bagend_ml.Client;
 using bagend_ml.Config;
 using bagend_ml.ML;
+using bagend_ml.ML.MLModels;
 using bagend_ml.ML.Training;
 using Microsoft.OpenApi.Models;
 
@@ -20,6 +21,8 @@ builder.Services.AddSingleton<OpenCloseMLEngine>();
 builder.Services.AddSingleton<Executor>();
 builder.Services.AddSingleton<EventPersistenceService>();
 builder.Services.AddSingleton<ModelMetaFileManager>();
+
+builder.Services.AddSingleton<CollectiveModelMLEnginePlugin>();
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
