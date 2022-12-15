@@ -25,7 +25,7 @@ namespace bagend_ml.ML.MLModels
                 models.Add(_mLEngine.BuildTrainAndEvaluateModel(stockTicker, property, $"{name}_open-close_{property}", 2).GetModelName());
             }
 
-            return CreateCollectiveMLModel(new CreateCollectiveModelRequest(models, name));
+            return CreateCollectiveMLModel(new CreateCollectiveModelRequest(models, name, stockTicker));
         }
 
 
@@ -64,7 +64,7 @@ namespace bagend_ml.ML.MLModels
                 throw new Exception($"cannot create collective ML model {request.CollectiveModelName} because one more provided model names does not exist");
             }
 
-            var collective = new CollectiveMLModel(models, request.CollectiveModelName, now, now);
+            var collective = new CollectiveMLModel(models, request.CollectiveModelName, request.StockTicker, now, now);
             var meta = collective.GetMeta();
             _metaFileManager.WriteMeta(meta);
 
@@ -75,7 +75,7 @@ namespace bagend_ml.ML.MLModels
         {
             var meta = getMeta(name)!;
             var models = GetTrainedModels(meta.Models);
-            return new CollectiveMLModel(models, name, meta.CreatedAt, meta.LastUpdateAt);
+            return new CollectiveMLModel(models, name, meta.StockTicker, meta.CreatedAt, meta.LastUpdateAt);
         }
 
         private CollectiveMLModelMeta? getMeta(string name)

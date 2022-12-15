@@ -6,10 +6,11 @@ namespace bagend_ml.ML
 {
 	public class CollectiveMLModelMeta : IMLMeta
     {
-        public CollectiveMLModelMeta(IList<string> models, string collectiveModelName, DateTime createdAt, DateTime lastUpdateAt)
+        public CollectiveMLModelMeta(IList<string> models, string collectiveModelName, string stockTicker, DateTime createdAt, DateTime lastUpdateAt)
         {
             Models = models;
             CollectiveModelName = collectiveModelName;
+            StockTicker = stockTicker;
             CreatedAt = createdAt;
             LastUpdateAt = lastUpdateAt;
         }
@@ -18,6 +19,7 @@ namespace bagend_ml.ML
 
         public IList<string> Models { get; set; } = new List<string>();
         public string? CollectiveModelName { get; set; }
+        public string? StockTicker { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime LastUpdateAt { get; set; }
 
@@ -41,16 +43,19 @@ namespace bagend_ml.ML
 
         public readonly IList<TrainedModel> Models;
 		public string CollectiveModelName { get; set; }
-		public DateTime CreatedAt { get; set; }
+        public string? StockTicker { get; set; }
+        public DateTime CreatedAt { get; set; }
 		public DateTime LastUpdateAt { get; set; }
 
 		public CollectiveMLModel(IList<TrainedModel> trainedModels,
 			string collectiveModelName,
+            string stockTicker,
 			DateTime createdAt,
 			DateTime lastUpdatedAt) 
 		{
 			Models = trainedModels;
 			CollectiveModelName = collectiveModelName;
+            StockTicker = stockTicker;
 			CreatedAt = createdAt;
 			LastUpdateAt = lastUpdatedAt;
 		}
@@ -61,6 +66,7 @@ namespace bagend_ml.ML
 		{
 			return new CollectiveMLModelMeta(GetModelNames(),
 				CollectiveModelName,
+                StockTicker,
 				CreatedAt,
 				LastUpdateAt);
 		}
