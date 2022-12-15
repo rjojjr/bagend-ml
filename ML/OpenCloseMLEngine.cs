@@ -191,8 +191,8 @@ namespace bagend_ml.ML
                 );
             var wholeData = _stockOpenCloseDataLoader.GetMasterDataView(stockTicker);
 
-            var trainingData = _stockOpenCloseDataLoader.FilterDataViewByYear(2021, wholeData);
-            var testData = _stockOpenCloseDataLoader.FilterDataViewByYear(2022, wholeData);
+            var trainingData = _stockOpenCloseDataLoader.FilterDataViewByYear(2017, 2021, wholeData);
+            var testData = _stockOpenCloseDataLoader.FilterDataViewByYear(2022, 2022, wholeData);
 
 
             var lastDate = _mlContextHolder.GetMLContext().Data.CreateEnumerable<ForcastingModelInput>(testData, false).Last().Date;

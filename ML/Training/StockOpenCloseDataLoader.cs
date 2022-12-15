@@ -47,12 +47,12 @@ namespace bagend_ml.ML.Training
 
 		public IDataView GetLatestTrainingData(string stockTicker)
 		{
-			return FilterDataViewByYear(2022, GetMasterDataView(stockTicker));
+			return FilterDataViewByYear(2022, 2022, GetMasterDataView(stockTicker));
 		}
 
-		public IDataView FilterDataViewByYear(int year, IDataView dataView)
+		public IDataView FilterDataViewByYear(int yearS, int yearE, IDataView dataView)
 		{
-            return _mlContextHolder.GetMLContext().Data.FilterRowsByColumn(dataView, "Year", upperBound: year + 1, lowerBound: year);
+            return _mlContextHolder.GetMLContext().Data.FilterRowsByColumn(dataView, "Year", upperBound: yearE + 1, lowerBound: yearS);
         }
 
 		public IDataView BuildDataView(IList<ForcastingModelInput> inputs)
