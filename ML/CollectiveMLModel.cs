@@ -28,6 +28,11 @@ namespace bagend_ml.ML
             return CollectiveModelName!;
         }
 
+        public string getStockTicker()
+        {
+            return StockTicker!;
+        }
+
         public string toJson()
         {
             return JsonSerializer.Serialize(this);
@@ -43,7 +48,7 @@ namespace bagend_ml.ML
 
         public readonly IList<TrainedModel> Models;
 		public string CollectiveModelName { get; set; }
-        public string? StockTicker { get; set; }
+        public string StockTicker { get; set; }
         public DateTime CreatedAt { get; set; }
 		public DateTime LastUpdateAt { get; set; }
 

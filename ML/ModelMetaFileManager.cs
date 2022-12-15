@@ -59,7 +59,7 @@ namespace bagend_ml.ML
         public void WriteMeta(IMLMeta meta)
         {
             var isCollective = meta is CollectiveMLModelMeta;
-            WriteFile(ConstructMetaFilePath(meta.getName()),
+            WriteFile(ConstructMetaFilePath(meta.getName(), isCollective),
                 meta.toJson());
         }
 

@@ -6,6 +6,8 @@ namespace bagend_ml.ML.MLModels
 		string getName();
 
 		string toJson();
+
+		string getStockTicker();
     }
 }
 

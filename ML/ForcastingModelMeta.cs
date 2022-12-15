@@ -41,7 +41,12 @@ namespace bagend_ml.ML
 			WindowSize = windowSize;
         }
 
-		public string getName()
+		public string getStockTicker()
+        {
+            return StockTicker!;
+        }
+
+        public string getName()
 		{
 			return ModelName;
 		}
