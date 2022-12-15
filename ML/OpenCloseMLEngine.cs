@@ -78,7 +78,7 @@ namespace bagend_ml.ML
 
             var predictions = new List<Prediction>();
             var prediction = new List<float>(GetPredictions(predictionsNeeded, model).Forcasts);
-            var wantedPredictions = prediction.GetRange(daysInRange - 1, prediction.Count());
+            var wantedPredictions = prediction.GetRange(daysInRange - 1, dates.Count());
 
             _logger.LogWarning("dates: {}, wanted: {}", dates.Count(), wantedPredictions.Count());
 
