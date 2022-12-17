@@ -26,6 +26,10 @@ namespace bagend_ml.ML.Training
 			}
 
             _logger.LogInformation("extracted {} forcasting training models, took {} millis", models.Count(), timer.getTimeElasped());
+
+			models.Sort((e1, e2) => {
+				return e1.Date.CompareTo(e2.Date);
+            });
             return models;
 		}
 
