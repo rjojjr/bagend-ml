@@ -13,46 +13,6 @@ namespace bagend_ml.ML.MLModels
 		private readonly ModelMetaFileManager _metaFileManager;
         private readonly Executor _executor;
 
-        
-
-        public class ModelBuilder
-        {
-            volatile int count = 0;
-            volatile IList<string> models = new List<string>();
-            private readonly Executor _executor;
-            private readonly OpenCloseMLEngine _mLEngine;
-
-            public ModelBuilder(Executor executor, OpenCloseMLEngine mLEngine)
-            {
-                _executor = executor;
-                _mLEngine = mLEngine;
-            }
-
-            public CreateCollectiveModelRequest CreateModel(string name, string stockTicker)
-            {
-                foreach (string property in ForcastingModelInput.PropertyList)
-                {
-                    _executor.execute(new ActionRunnable(() =>
-                    {
-                        var model = _mLEngine.BuildTrainAndEvaluateModel(stockTicker, property, $"{name}_open-close_{property}", 2);
-                        lock (this)
-                        {
-                            models.Add(model.GetModelName());
-                            count++;
-                        }
-
-                    }));
-                }
-
-               while(count < 4)
-                {
-                    Thread.Sleep(50);
-                }
-
-                return new CreateCollectiveModelRequest(models, name, stockTicker);
-            }
-        }
-
         public CollectiveModelMLEnginePlugin(OpenCloseMLEngine mLEngine,
             ModelMetaFileManager metaFileManager,
             Executor executor)
@@ -64,8 +24,8 @@ namespace bagend_ml.ML.MLModels
 
         public CollectiveMLModel DeepCreateCollectiveOpenCloseModel(string name, string stockTicker)
         {
-
-            return CreateCollectiveMLModel(new ModelBuilder(_executor, _mLEngine).CreateModel(name, stockTicker));
+            var shallowCreateModelRequest = CollectiveModelRequestBuilder.Build(_executor, _mLEngine, name, stockTicker);
+            return CreateCollectiveMLModel(shallowCreateModelRequest);
         }
 
 
@@ -140,6 +100,49 @@ namespace bagend_ml.ML.MLModels
             return _mLEngine.LoadTrainedModel(name);
         }
 
+        private class CollectiveModelRequestBuilder
+        {
+            volatile int count = 0;
+            volatile IList<string> models = new List<string>();
+            private readonly Executor _executor;
+            private readonly OpenCloseMLEngine _mLEngine;
+
+            private CollectiveModelRequestBuilder(Executor executor, OpenCloseMLEngine mLEngine)
+            {
+                _executor = executor;
+                _mLEngine = mLEngine;
+            }
+
+            public static CreateCollectiveModelRequest Build(Executor executor, OpenCloseMLEngine mLEngine, string name, string stockTicker)
+            {
+                return new CollectiveModelRequestBuilder(executor, mLEngine).BuildShallowCreateModelRequest(name, stockTicker);
+            }
+
+            private CreateCollectiveModelRequest BuildShallowCreateModelRequest(string name, string stockTicker)
+            {
+                foreach (string property in ForcastingModelInput.PropertyList)
+                {
+                    _executor.execute(new ActionRunnable(() =>
+                    {
+
+                        var model = _mLEngine.BuildTrainAndEvaluateModel(stockTicker, property, $"{name}_open-close_{property}", 2);
+                        lock (this)
+                        {
+                            models.Add(model.GetModelName());
+                            count++;
+                        }
+
+                    }));
+                }
+
+                while (count < ForcastingModelInput.PropertyList.Count())
+                {
+                    Thread.Sleep(10);
+                }
+
+                return new CreateCollectiveModelRequest(models, name, stockTicker);
+            }
+        }
 
     }
 }
