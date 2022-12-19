@@ -30,7 +30,7 @@ namespace bagend_ml.Controllers
         /// <summary>
         /// Fetches all current ML model metas.
         /// </summary>
-        /// <remarks></remarks>
+        /// <remarks>Get metadata for saved SSA ML models.</remarks>
         /// <response code="200">Success</response>
         /// <response code="500">Something went wrong</response>
         [HttpGet]
@@ -69,7 +69,7 @@ namespace bagend_ml.Controllers
         /// <summary>
         /// Deep creates new collective ML model by automatically creating individual models.
         /// </summary>
-        /// <remarks>Collective models allow you to build more complex models.</remarks>
+        /// <remarks>Deep creates new collective model by actually creating new instances of each individual model in the collection.</remarks>
         /// <response code="201">Success</response>
         /// <response code="500">Something went wrong</response>
         [HttpPost]
@@ -85,9 +85,9 @@ namespace bagend_ml.Controllers
         }
 
         /// <summary>
-        /// Creates new collective ML model.
+        /// Creates new shallow collective ML model.
         /// </summary>
-        /// <remarks>Collective models allow you to build more complex models.</remarks>
+        /// <remarks>Creates new shallow(requires that provided individual models already exist) collective ML model.</remarks>
         /// <response code="201">Success</response>
         /// <response code="500">Something went wrong</response>
         [HttpPost]
@@ -103,7 +103,7 @@ namespace bagend_ml.Controllers
         }
 
         /// <summary>
-        /// Get predictions for given model and date range.
+        /// Get predictions for given individual SSA ML model and date range.
         /// </summary>
         /// <remarks></remarks>
         /// <response code="200">Success</response>
@@ -131,7 +131,7 @@ namespace bagend_ml.Controllers
         }
 
         /// <summary>
-        /// Get collective predictions for given model and date range.
+        /// Get predictions for given collective SSA ML model and date range.
         /// </summary>
         /// <remarks></remarks>
         /// <response code="200">Success</response>
@@ -161,7 +161,7 @@ namespace bagend_ml.Controllers
         /// <summary>
         /// Builds and trains new open/close ML model.
         /// </summary>
-        /// <remarks></remarks>
+        /// <remarks>Builds, trains and persists new individual open/close SSA ML model.</remarks>
         /// <response code="201">Open/Close ML model created</response>
         /// <response code="500">Something went wrong</response>
         [HttpPost]
