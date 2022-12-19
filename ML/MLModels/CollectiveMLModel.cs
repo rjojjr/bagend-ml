@@ -2,7 +2,7 @@
 using System.Text.Json;
 using bagend_ml.ML.MLModels;
 
-namespace bagend_ml.ML
+namespace bagend_ml.ML.MLModels
 {
 	public class CollectiveMLModelMeta : IMLMeta
     {

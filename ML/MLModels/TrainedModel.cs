@@ -2,7 +2,7 @@
 using System.Security.Cryptography.Xml;
 using Microsoft.ML;
 
-namespace bagend_ml.ML
+namespace bagend_ml.ML.MLModels
 {
 
 	public class TrainedModel

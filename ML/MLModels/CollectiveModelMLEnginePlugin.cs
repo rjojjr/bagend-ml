@@ -1,31 +1,71 @@
 ﻿using System;
 using System.Xml.Linq;
 using bagend_ml.ML.Training;
+using bagend_ml.ML.MLModels;
 using bagend_ml.Util;
+using System.CodeDom.Compiler;
 
 namespace bagend_ml.ML.MLModels
 {
 	public class CollectiveModelMLEnginePlugin
-	{
-
-		private readonly OpenCloseMLEngine _mLEngine;
+    { 
+        private readonly OpenCloseMLEngine _mLEngine;
 		private readonly ModelMetaFileManager _metaFileManager;
+        private readonly Executor _executor;
 
-        public CollectiveModelMLEnginePlugin(OpenCloseMLEngine mLEngine, ModelMetaFileManager metaFileManager)
+        
+
+        public class ModelBuilder
+        {
+            volatile int count = 0;
+            volatile IList<string> models = new List<string>();
+            private readonly Executor _executor;
+            private readonly OpenCloseMLEngine _mLEngine;
+
+            public ModelBuilder(Executor executor, OpenCloseMLEngine mLEngine)
+            {
+                _executor = executor;
+                _mLEngine = mLEngine;
+            }
+
+            public CreateCollectiveModelRequest CreateModel(string name, string stockTicker)
+            {
+                foreach (string property in ForcastingModelInput.PropertyList)
+                {
+                    _executor.execute(new ActionRunnable(() =>
+                    {
+                        var model = _mLEngine.BuildTrainAndEvaluateModel(stockTicker, property, $"{name}_open-close_{property}", 2);
+                        lock (this)
+                        {
+                            models.Add(model.GetModelName());
+                            count++;
+                        }
+
+                    }));
+                }
+
+               while(count < 4)
+                {
+                    Thread.Sleep(50);
+                }
+
+                return new CreateCollectiveModelRequest(models, name, stockTicker);
+            }
+        }
+
+        public CollectiveModelMLEnginePlugin(OpenCloseMLEngine mLEngine,
+            ModelMetaFileManager metaFileManager,
+            Executor executor)
         {
             this._mLEngine = mLEngine;
             this._metaFileManager = metaFileManager;
+            _executor = executor;
         }
 
         public CollectiveMLModel DeepCreateCollectiveOpenCloseModel(string name, string stockTicker)
         {
-            var models = new List<string>();
-            foreach(string property in ForcastingModelInput.PropertyList)
-            {
-                models.Add(_mLEngine.BuildTrainAndEvaluateModel(stockTicker, property, $"{name}_open-close_{property}", 2).GetModelName());
-            }
 
-            return CreateCollectiveMLModel(new CreateCollectiveModelRequest(models, name, stockTicker));
+            return CreateCollectiveMLModel(new ModelBuilder(_executor, _mLEngine).CreateModel(name, stockTicker));
         }
 
 
