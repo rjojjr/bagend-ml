@@ -12,18 +12,22 @@ namespace bagend_ml.ML.MLModels
         private readonly OpenCloseMLEngine _mLEngine;
 		private readonly ModelMetaFileManager _metaFileManager;
         private readonly Executor _executor;
+        private readonly ILogger<CollectiveModelMLEnginePlugin> _logger;
 
         public CollectiveModelMLEnginePlugin(OpenCloseMLEngine mLEngine,
             ModelMetaFileManager metaFileManager,
-            Executor executor)
+            Executor executor,
+            ILogger<CollectiveModelMLEnginePlugin> logger)
         {
             this._mLEngine = mLEngine;
             this._metaFileManager = metaFileManager;
             _executor = executor;
+            _logger = logger;
         }
 
         public CollectiveMLModel DeepCreateCollectiveOpenCloseModel(string name, string stockTicker)
         {
+            _logger.LogInformation("creating collective ML model {} for stock ticker {}", name, stockTicker);
             var shallowCreateModelRequest = CollectiveModelRequestBuilder.Build(_executor, _mLEngine, name, stockTicker);
             return CreateCollectiveMLModel(shallowCreateModelRequest);
         }
@@ -31,17 +35,12 @@ namespace bagend_ml.ML.MLModels
 
         public IList<CollectivePrediction> GetPredictions(string startDate, string endDate, string modelName)
         {
+            _logger.LogInformation("getting predictions from collective ML model {} for dates {} - {}", modelName, startDate, endDate);
             var predictions = new List<CollectivePrediction>();
             var model = LoadCollectiveMLModel(modelName);
-            var predictionsForEachModel = new List<IList<Prediction>>();
-            foreach(TrainedModel trainedModel in model.Models)
-            {
-                var currentPredictions = _mLEngine.GetPredictions(startDate, endDate, trainedModel);
-                predictionsForEachModel.Add(currentPredictions);
-            }
+            var predictionsForEachModel = PredictionBuilder.Build(model, _mLEngine, _executor, startDate, endDate);
 
-            
-            for(int i = 0; i < predictionsForEachModel[0].Count(); i++)
+            for (int i = 0; i < predictionsForEachModel[0].Count(); i++)
             {
                 var predictionsForPoint = new List<Prediction>();
                 foreach(List<Prediction> predictions1 in predictionsForEachModel)
@@ -71,7 +70,7 @@ namespace bagend_ml.ML.MLModels
             return collective;
         }
 
-        public CollectiveMLModel LoadCollectiveMLModel(string name)
+        private CollectiveMLModel LoadCollectiveMLModel(string name)
         {
             var meta = getMeta(name)!;
             var models = GetTrainedModels(meta.Models);
@@ -100,7 +99,54 @@ namespace bagend_ml.ML.MLModels
             return _mLEngine.LoadTrainedModel(name);
         }
 
-        private class CollectiveModelRequestBuilder
+        private class PredictionBuilder
+        {
+            volatile IList<IList<Prediction>> predictionsForEachModel = new List<IList<Prediction>>();
+            private volatile int count = 0;
+
+            private readonly CollectiveMLModel _collectiveMLModel;
+            private readonly OpenCloseMLEngine _mLEngine;
+            private readonly Executor _executor;
+
+            private PredictionBuilder(CollectiveMLModel collectiveMLModel, OpenCloseMLEngine mLEngine, Executor executor)
+            {
+                _collectiveMLModel = collectiveMLModel;
+                _mLEngine = mLEngine;
+                _executor = executor;
+            }
+
+            public static IList<IList<Prediction>> Build(CollectiveMLModel collectiveMLModel, OpenCloseMLEngine mLEngine, Executor executor, string startDate, string endDate)
+            {
+                return new PredictionBuilder(collectiveMLModel, mLEngine, executor).BuildPredictions(startDate, endDate);
+            }
+
+            private IList<IList<Prediction>> BuildPredictions(string startDate, string endDate)
+            {
+                foreach (TrainedModel trainedModel in _collectiveMLModel.Models)
+                {
+                    _executor.execute(new ActionRunnable(() =>
+                    {
+                        var predictions = _mLEngine.GetPredictions(startDate, endDate, trainedModel);
+                        lock (this)
+                        {
+                            predictionsForEachModel.Add(predictions);
+                            count++;
+                        }
+
+                    }));
+                }
+
+                while (count < _collectiveMLModel.Models.Count())
+                {
+                    Thread.Sleep(10);
+                }
+
+                return predictionsForEachModel;
+            }
+
+    }
+
+    private class CollectiveModelRequestBuilder
         {
             volatile int count = 0;
             volatile IList<string> models = new List<string>();
