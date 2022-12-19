@@ -25,6 +25,12 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<EventApiConfig>(
     builder.Configuration.GetSection("EventApiConfig"));
 
+builder.Services.Configure<DataScraperApiConfig>(
+    builder.Configuration.GetSection("DataScraperApiConfig"));
+
+builder.Services.Configure<CollectiveModelBuilderService>(
+    builder.Configuration.GetSection("CollectiveModelBuilderService"));
+
 // Add services to the container.
 
 builder.Services.AddSingleton<EventApiRESTClient>();
@@ -37,6 +43,8 @@ builder.Services.AddSingleton<EventPersistenceService>();
 builder.Services.AddSingleton<ModelMetaFileManager>();
 
 builder.Services.AddSingleton<CollectiveModelMLEnginePlugin>();
+builder.Services.AddSingleton<DataScraperApiRESTClient>();
+builder.Services.AddSingleton<CollectiveModelBuilderService>();
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
