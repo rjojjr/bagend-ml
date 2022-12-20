@@ -179,7 +179,7 @@ namespace bagend_ml.ML
             return engine;
         }
 
-        public TrainedModel BuildTrainAndEvaluateModel(string stockTicker, string forcastedProperty, string modelName, int windowSize)
+        public TrainedModel BuildTrainAndEvaluateModel(string stockTicker, string forcastedProperty, string modelName, int windowSize, string endDate)
         {
             var config = new ForcastingPipelineConfig("Forcasts",
                     forcastedProperty,
@@ -190,26 +190,30 @@ namespace bagend_ml.ML
                     "ForcastLowerBound",
                     "ForcastUpperBound"
                 );
-            var wholeData = _stockOpenCloseDataLoader.GetMasterDataView(stockTicker);
+            var wholeData = _stockOpenCloseDataLoader.GetMasterDataView(stockTicker, endDate);
 
-            var trainingData = _stockOpenCloseDataLoader.FilterDataViewByYear(2017, 2021, wholeData);
-            var testData = _stockOpenCloseDataLoader.FilterDataViewByYear(2022, 2022, wholeData);
+            if(wholeData.GetRowCount() > 0)
+            {
+                var trainingData = _stockOpenCloseDataLoader.FilterDataViewByYear(2017, 2021, wholeData);
+                var testData = _stockOpenCloseDataLoader.FilterDataViewByYear(2022, 2022, wholeData);
 
 
-            var lastDate = _mlContextHolder.GetMLContext().Data.CreateEnumerable<ForcastingModelInput>(testData, false).Last().Date;
+                var lastDate = _mlContextHolder.GetMLContext().Data.CreateEnumerable<ForcastingModelInput>(testData, false).Last().Date;
 
-            ITransformer model = trainAndGetModel(trainingData, config);
+                ITransformer model = trainAndGetModel(trainingData, config);
 
-            var trainedModel = EvaluateModel(testData, new TrainedModel(model, new ModelEvalResults(), modelName, stockTicker, DateUtil.GetDateString(lastDate), forcastedProperty, windowSize));
+                var trainedModel = EvaluateModel(testData, new TrainedModel(model, new ModelEvalResults(), modelName, stockTicker, DateUtil.GetDateString(lastDate), forcastedProperty, windowSize));
 
-            PersistModel(trainedModel, GetForcastingEngine(model));
+                PersistModel(trainedModel, GetForcastingEngine(model));
 
-            _eventPersistenceService.PostRecordedEvent(new OpenCloseMLModelCreateEvent(modelName,
-                stockTicker,
-                forcastedProperty,
-                trainedModel.GetCreationTimestamp()));
+                _eventPersistenceService.PostRecordedEvent(new OpenCloseMLModelCreateEvent(modelName,
+                    stockTicker,
+                    forcastedProperty,
+                    trainedModel.GetCreationTimestamp()));
 
-            return trainedModel;
+                return trainedModel;
+            }
+            return null;
         }
 
         private Microsoft.ML.Transforms.TimeSeries.SsaForecastingEstimator BuildClosePriceForcastingPipeline(int dataPointCount, ForcastingPipelineConfig config)

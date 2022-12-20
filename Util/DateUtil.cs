@@ -38,7 +38,7 @@ namespace bagend_ml.Util
         {
             var dates = new List<string>();
             var date = start;
-            while(compareDateStrings(date, end) < 1)
+            while(CompareDateStrings(date, end) < 1)
             {
                 dates.Add(date);
                 var next = GetDateTimeFromString(date).AddDays(1);
@@ -53,7 +53,7 @@ namespace bagend_ml.Util
             return num < 10 ? "0" + num : "" + num;
         }
 
-        private static int compareDateStrings(string first, string second)
+        public static int CompareDateStrings(string first, string second)
         {
             var firstDt = GetDateTimeFromString(first);
             var secondDt = GetDateTimeFromString(second);

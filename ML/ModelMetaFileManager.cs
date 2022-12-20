@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Text;
+using System.Text.Json;
 using bagend_ml.ML.MLModels;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -12,12 +13,28 @@ namespace bagend_ml.ML
         private readonly ConcurrentDictionary<string, object> _fileLocks;
         private readonly ILogger<ModelMetaFileManager> _logger;
 
+        private const string DefaultsFilePath = "/data/bagend-ml/models/meta/collective/defaults/";
+
         public ModelMetaFileManager(ILogger<ModelMetaFileManager> logger)
 		{
             _logger = logger;
             _fileLocks = new ConcurrentDictionary<string, object>();
             makeDirs();
 		}
+
+        public IList<DefaultTickerModelEntry> GetDefaults()
+        {
+            var json = ReadFile(DefaultsFilePath + "defaults.json.meta");
+            return json != null && json != "" ? JsonSerializer.Deserialize<DefaultModels>(json).Defaults : new List<DefaultTickerModelEntry>();
+        }
+
+        public void SaveDefaults(IList<DefaultTickerModelEntry> defaults)
+        {
+            var contents = new DefaultModels(defaults);
+            var json = JsonSerializer.Serialize(contents);
+
+            WriteFile(DefaultsFilePath + "defaults.json.meta", json);
+        }
 
         public IList<T> GetAllModelMeta<T>()
         {
@@ -65,6 +82,7 @@ namespace bagend_ml.ML
 
         public void WriteMeta(CollectiveMLModelMeta forcastingModelMeta)
         {
+            _logger.LogInformation("writing meta for model {}", forcastingModelMeta.CollectiveModelName);
             WriteFile(ConstructMetaFilePath(forcastingModelMeta.CollectiveModelName, true),
                 forcastingModelMeta.toJson());
         }
@@ -93,6 +111,12 @@ namespace bagend_ml.ML
             {
                 _logger.LogInformation("creating dir {}", trainedDir);
                 Directory.CreateDirectory(trainedDir);
+            }
+
+            if (!File.Exists(DefaultsFilePath))
+            {
+                _logger.LogInformation("creating dir {}", DefaultsFilePath);
+                Directory.CreateDirectory(DefaultsFilePath);
             }
         }
 

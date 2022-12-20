@@ -44,6 +44,7 @@ builder.Services.AddSingleton<ModelMetaFileManager>();
 
 builder.Services.AddSingleton<CollectiveModelMLEnginePlugin>();
 builder.Services.AddSingleton<DataScraperApiRESTClient>();
+builder.Services.AddSingleton<TickerModelDefaultsManager>();
 builder.Services.AddSingleton<CollectiveModelBuilderService>();
 
 builder.Services.AddControllers()

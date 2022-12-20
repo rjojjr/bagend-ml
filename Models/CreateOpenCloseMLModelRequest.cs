@@ -7,6 +7,7 @@ namespace bagend_ml.Models
 		public string ForcastedProperty { get; set; } = "ClosingPrice";
         public string StockTicker { get; set; } = null!;
 		public int WindowSize { get; set; } = 2;
+		public string Date { get; set; }
 
         public CreateOpenCloseMLModelRequest()
 		{

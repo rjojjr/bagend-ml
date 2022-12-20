@@ -14,16 +14,19 @@ namespace bagend_ml.Controllers
 		private readonly ModelMetaFileManager _modelMetaFileManager;
         private readonly OpenCloseMLEngine _openCloseMLEngine;
         private readonly CollectiveModelMLEnginePlugin _collectiveMlEngine;
+        private readonly CollectiveModelBuilderService _collectiveModelBuilderService;
         private readonly ILogger<OpenCloseModelsController> _logger;
 
         public OpenCloseModelsController(ModelMetaFileManager modelMetaFileManager,
             OpenCloseMLEngine openCloseMLEngine,
             CollectiveModelMLEnginePlugin mlModelManager,
+            CollectiveModelBuilderService collectiveModelBuilderService,
             ILogger<OpenCloseModelsController> logger)
         {
             _modelMetaFileManager = modelMetaFileManager;
             _openCloseMLEngine = openCloseMLEngine;
             _collectiveMlEngine = mlModelManager;
+            _collectiveModelBuilderService = collectiveModelBuilderService;
             _logger = logger;
         }
 
@@ -65,7 +68,6 @@ namespace bagend_ml.Controllers
 
         }
 
-
         /// <summary>
         /// Deep creates new collective ML model by automatically creating individual models.
         /// </summary>
@@ -79,7 +81,7 @@ namespace bagend_ml.Controllers
             return ExecuteWithExceptionHandler(() =>
             {
                 _logger.LogInformation("received request to create collective ML model {}", request.Name);
-                return Created(".", _collectiveMlEngine.DeepCreateCollectiveOpenCloseModel(request.Name, request.StockTicker).GetMeta());
+                return Created(".", _collectiveMlEngine.DeepCreateCollectiveOpenCloseModel(request.Name, request.StockTicker, request.Date).GetMeta());
             });
 
         }
@@ -131,6 +133,25 @@ namespace bagend_ml.Controllers
         }
 
         /// <summary>
+        /// Schedules creation of collective models for all tickers on the given date.
+        /// </summary>
+        /// <remarks></remarks>
+        /// <response code="201">Success</response>
+        /// <response code="500">Something went wrong</response>
+        [HttpPost]
+        [Route("builder")]
+        public IActionResult BuildModels([FromBody] CollectiveModelBuilderBuildRequest request)
+        {
+            return ExecuteWithExceptionHandler(() =>
+            {
+                _logger.LogInformation("received request to fetch all open/close ML model meta");
+                _collectiveModelBuilderService.BuildModelsForDay(request.Date);
+                return Created(".", "success");
+            });
+
+        }
+
+        /// <summary>
         /// Get predictions for given collective SSA ML model and date range.
         /// </summary>
         /// <remarks></remarks>
@@ -170,7 +191,7 @@ namespace bagend_ml.Controllers
             return ExecuteWithExceptionHandler(() =>
             {
                 _logger.LogInformation("received request to build open/close ML model {} for ticker {} property {}", request.ModelName, request.StockTicker, request.ForcastedProperty);
-                return Created(".", _openCloseMLEngine.BuildTrainAndEvaluateModel(request.StockTicker, request.ForcastedProperty, request.ModelName, request.WindowSize).GetModelMeta());
+                return Created(".", _openCloseMLEngine.BuildTrainAndEvaluateModel(request.StockTicker, request.ForcastedProperty, request.ModelName, request.WindowSize, request.Date).GetModelMeta());
             });
         }
     }

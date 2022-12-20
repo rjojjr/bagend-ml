@@ -28,20 +28,20 @@ namespace bagend_ml.Client
             return new RestClient(options);
         }
 
-        public IList<TickerDataTarget> GetTickerDataTargets()
+        public TickerDataTargetResults GetTickerDataTargets()
         {
             _logger.LogInformation("fetching available ticker data targets");
             var timer = Timer.Timer.TimerFactory(true);
             var results = GetTickerTargetsAsync().Result;
 
-            _logger.LogInformation("done fetching available ticker data targets found {} results, took {} millis", results.Count(), timer.getTimeElasped());
+            _logger.LogInformation("done fetching available ticker data targets found {} results, took {} millis", results.ResultsCount, timer.getTimeElasped());
             return results;
         }
 
-        private async Task<IList<TickerDataTarget>> GetTickerTargetsAsync()
+        private async Task<TickerDataTargetResults> GetTickerTargetsAsync()
         {
             var request = new RestRequest("/data/target/api/v1");
-            return await _restClient.GetAsync<IList<TickerDataTarget>>(request);
+            return await _restClient.GetAsync<TickerDataTargetResults> (request);
         }
     }
 }

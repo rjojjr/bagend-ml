@@ -25,10 +25,10 @@ namespace bagend_ml.ML.MLModels
             _logger = logger;
         }
 
-        public CollectiveMLModel DeepCreateCollectiveOpenCloseModel(string name, string stockTicker)
+        public CollectiveMLModel DeepCreateCollectiveOpenCloseModel(string name, string stockTicker, string date)
         {
             _logger.LogInformation("creating collective ML model {} for stock ticker {}", name, stockTicker);
-            var shallowCreateModelRequest = CollectiveModelRequestBuilder.Build(_executor, _mLEngine, name, stockTicker);
+            var shallowCreateModelRequest = CollectiveModelRequestBuilder.Build(_executor, _mLEngine, name, stockTicker, date);
             return CreateCollectiveMLModel(shallowCreateModelRequest);
         }
 
@@ -66,7 +66,7 @@ namespace bagend_ml.ML.MLModels
             var collective = new CollectiveMLModel(models, request.CollectiveModelName, request.StockTicker, now, now);
             var meta = collective.GetMeta();
             _metaFileManager.WriteMeta(meta);
-
+            _logger.LogInformation("created collective model {}", request.CollectiveModelName);
             return collective;
         }
 
@@ -159,25 +159,32 @@ namespace bagend_ml.ML.MLModels
                 _mLEngine = mLEngine;
             }
 
-            public static CreateCollectiveModelRequest Build(Executor executor, OpenCloseMLEngine mLEngine, string name, string stockTicker)
+            public static CreateCollectiveModelRequest Build(Executor executor, OpenCloseMLEngine mLEngine, string name, string stockTicker, string date)
             {
-                return new CollectiveModelRequestBuilder(executor, mLEngine).BuildShallowCreateModelRequest(name, stockTicker);
+                return new CollectiveModelRequestBuilder(executor, mLEngine).BuildShallowCreateModelRequest(name, stockTicker, date);
             }
 
-            private CreateCollectiveModelRequest BuildShallowCreateModelRequest(string name, string stockTicker)
+            private CreateCollectiveModelRequest BuildShallowCreateModelRequest(string name, string stockTicker, string date)
             {
                 foreach (string property in ForcastingModelInput.PropertyList)
                 {
                     _executor.execute(new ActionRunnable(() =>
                     {
 
-                        var model = _mLEngine.BuildTrainAndEvaluateModel(stockTicker, property, $"{name}_open-close_{property}", 2);
+                        var model = _mLEngine.BuildTrainAndEvaluateModel(stockTicker, property, $"{name}_open-close_{property}", 2, date);
+
                         lock (this)
                         {
-                            models.Add(model.GetModelName());
-                            count++;
+                            if (model != null)
+                            {
+                                models.Add(model.GetModelName());
+                                count++;
+                            }
+                            else
+                            {
+                                count++;
+                            }
                         }
-
                     }));
                 }
 
@@ -186,7 +193,7 @@ namespace bagend_ml.ML.MLModels
                     Thread.Sleep(10);
                 }
 
-                return new CreateCollectiveModelRequest(models, name, stockTicker);
+                return new CreateCollectiveModelRequest(models, name, stockTicker, date);
             }
         }
 

@@ -5,14 +5,16 @@ namespace bagend_ml.ML.MLModels
 	{
 		public string Name { get; set; }
 		public string StockTicker { get; set; }
-		public DeepCreateCollectiveModelRequest()
+        public string Date { get; set; }
+        public DeepCreateCollectiveModelRequest()
 		{
 		}
 
-        public DeepCreateCollectiveModelRequest(string name, string stockTicker)
+        public DeepCreateCollectiveModelRequest(string name, string stockTicker, string date)
         {
             Name = name;
             StockTicker = stockTicker;
+            Date = date;
         }
     }
 }
