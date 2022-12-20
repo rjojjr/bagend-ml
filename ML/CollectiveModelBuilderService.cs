@@ -22,6 +22,9 @@ namespace bagend_ml.ML
 
         private ConcurrentQueue<ThreadStart> _operationQueue;
 
+        private long total = 0;
+        private long done = 0;
+
         public CollectiveModelBuilderService(ILogger<CollectiveModelBuilderService> logger,
             DataScraperApiRESTClient dataScraperApiClient,
             CollectiveModelMLEnginePlugin collectiveModelMLEnginePlugin,
@@ -45,6 +48,7 @@ namespace bagend_ml.ML
             _logger.LogInformation("submitting instructions to build collective ML models for day {}", day);
             var timer = Timer.Timer.TimerFactory(true);
             var tickers = GetTickers();
+            Interlocked.Increment(ref total);
             foreach(string ticker in tickers)
             {
                 _operationQueue.Enqueue(() => BuildModelThread(ticker, day));
@@ -55,6 +59,15 @@ namespace bagend_ml.ML
                 RunNext();
             }
             _logger.LogInformation("finished submitting instructions to build collective ML models for day {}, took {} millis", day, timer.getTimeElasped());
+        }
+
+        public long[] GetStatus()
+        {
+            return new long[]
+            {
+                total,
+                done
+            };
         }
 
         private void RunNext()
@@ -79,6 +92,7 @@ namespace bagend_ml.ML
                 {
                     _logger.LogError(e.Message);
                 }
+                Interlocked.Increment(ref done);
                 RunNext();
             }));
         }

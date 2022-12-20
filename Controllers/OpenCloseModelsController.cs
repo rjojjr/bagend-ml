@@ -133,6 +133,25 @@ namespace bagend_ml.Controllers
         }
 
         /// <summary>
+        /// Get status of current model builder job
+        /// </summary>
+        /// <remarks></remarks>
+        /// <response code="200">Success</response>
+        /// <response code="500">Something went wrong</response>
+        [HttpGet]
+        [Route("builder/status")]
+        public IActionResult GetBuilderStatus()
+        {
+            return ExecuteWithExceptionHandler(() =>
+            {
+                _logger.LogInformation("received request to fetch all open/close ML model builder status");
+                var predictions = _collectiveModelBuilderService.GetStatus();
+                return Ok(predictions);
+            });
+
+        }
+
+        /// <summary>
         /// Schedules creation of collective models for all tickers on the given date.
         /// </summary>
         /// <remarks></remarks>
