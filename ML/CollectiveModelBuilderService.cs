@@ -48,7 +48,7 @@ namespace bagend_ml.ML
             _logger.LogInformation("submitting instructions to build collective ML models for day {}", day);
             var timer = Timer.Timer.TimerFactory(true);
             var tickers = GetTickers();
-            Interlocked.Increment(ref total);
+            total = tickers.Count();
             foreach(string ticker in tickers)
             {
                 _operationQueue.Enqueue(() => BuildModelThread(ticker, day));
