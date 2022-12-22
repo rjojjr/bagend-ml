@@ -3,6 +3,7 @@ using bagend_ml.Client;
 using bagend_ml.Config;
 using bagend_ml.ML;
 using bagend_ml.ML.MLModels;
+using bagend_ml.ML.Predictions;
 using bagend_ml.ML.Training;
 using Microsoft.OpenApi.Models;
 
@@ -46,6 +47,7 @@ builder.Services.AddSingleton<CollectiveModelMLEnginePlugin>();
 builder.Services.AddSingleton<DataScraperApiRESTClient>();
 builder.Services.AddSingleton<TickerModelDefaultsManager>();
 builder.Services.AddSingleton<CollectiveModelBuilderService>();
+builder.Services.AddSingleton<PredictionPersistenceService>();
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>

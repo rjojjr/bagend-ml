@@ -39,6 +39,7 @@
     <None Remove="Microsoft.ML.Mkl.Components" />
     <None Remove="MKL.NET.linux-x64" />
     <None Remove="ML\MLModels\" />
+    <None Remove="ML\Predictions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ML\" />
@@ -49,5 +50,6 @@
     <Folder Include="Models\" />
     <Folder Include="Models\ExternalEvents\" />
     <Folder Include="ML\MLModels\" />
+    <Folder Include="ML\Predictions\" />
   </ItemGroup>
 </Project>

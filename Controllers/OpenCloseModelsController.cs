@@ -1,6 +1,7 @@
 ﻿using System;
 using bagend_ml.ML;
 using bagend_ml.ML.MLModels;
+using bagend_ml.ML.Predictions;
 using bagend_ml.Models;
 using bagend_ml.Util;
 using Microsoft.AspNetCore.Mvc;
@@ -193,6 +194,34 @@ namespace bagend_ml.Controllers
             {
                 _logger.LogInformation("received request to fetch all open/close ML model meta");
                 var predictions = _collectiveMlEngine.GetPredictions(startDate, endDate, modelName);
+                return Ok(predictions);
+            });
+
+        }
+
+        /// <summary>
+        /// Gets and persists predictions for given collective SSA ML model and date range.
+        /// </summary>
+        /// <remarks></remarks>
+        /// <response code="200">Success</response>
+        /// <response code="500">Something went wrong</response>
+        [HttpGet]
+        [Route("collective/prediction/persist")]
+        public IActionResult GetAndPersistCollectiveForcastedPredictions([FromQuery] GetAndPersistPredictionRequest request)
+        {
+            if (request.StartDate == null || request.StartDate.Equals(""))
+            {
+                request.StartDate = DateUtil.GetToday();
+            }
+            if (request.EndDate == null || request.EndDate.Equals(""))
+            {
+                request.EndDate = DateUtil.GetToday();
+            }
+
+            return ExecuteWithExceptionHandler(() =>
+            {
+                _logger.LogInformation("received request for persisted prediction for {}", request.StockTicker);
+                var predictions = _collectiveMlEngine.GetAndPersistPredictions(request);
                 return Ok(predictions);
             });
 

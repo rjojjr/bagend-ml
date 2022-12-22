@@ -54,13 +54,13 @@ namespace bagend_ml.ML
 
         public IList<Prediction> GetPredictions(string startDate, string endDate, TrainedModel model)
         {
-            var dates = DateUtil.GetDatesBetween(startDate, endDate);
+            var dates = DateUtil.GetWeekDayDatesBetween(startDate, endDate);
             return GetPredictions(dates, trainedModel: model);
         }
 
         public IList<Prediction> GetPredictions(string startDate, string endDate, string modelName)
         {
-            var dates = DateUtil.GetDatesBetween(startDate, endDate);
+            var dates = DateUtil.GetWeekDayDatesBetween(startDate, endDate);
             return GetPredictions(dates, modelName);
         }
 

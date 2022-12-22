@@ -4,6 +4,7 @@ using bagend_ml.ML.Training;
 using bagend_ml.ML.MLModels;
 using bagend_ml.Util;
 using System.CodeDom.Compiler;
+using bagend_ml.ML.Predictions;
 
 namespace bagend_ml.ML.MLModels
 {
@@ -13,16 +14,31 @@ namespace bagend_ml.ML.MLModels
 		private readonly ModelMetaFileManager _metaFileManager;
         private readonly Executor _executor;
         private readonly ILogger<CollectiveModelMLEnginePlugin> _logger;
+        private readonly PredictionPersistenceService _predictionPersistenceService;
 
         public CollectiveModelMLEnginePlugin(OpenCloseMLEngine mLEngine,
             ModelMetaFileManager metaFileManager,
             Executor executor,
-            ILogger<CollectiveModelMLEnginePlugin> logger)
+            ILogger<CollectiveModelMLEnginePlugin> logger,
+            PredictionPersistenceService predictionPersistenceService)
         {
-            this._mLEngine = mLEngine;
-            this._metaFileManager = metaFileManager;
+            _mLEngine = mLEngine;
+            _metaFileManager = metaFileManager;
             _executor = executor;
             _logger = logger;
+            _predictionPersistenceService = predictionPersistenceService;
+        }
+
+
+        public IList<CollectivePrediction> GetAndPersistPredictions(GetAndPersistPredictionRequest request)
+        {
+            var predictions = GetPredictions(request.StartDate, request.EndDate, request.ModelName);
+            _executor.execute(new ActionRunnable(() =>
+            {
+                _predictionPersistenceService.PersistPrediction(request.PredictionName, request.StockTicker, request.ModelName, DateTime.UtcNow, predictions);
+            }));
+
+            return predictions;
         }
 
         public CollectiveMLModel DeepCreateCollectiveOpenCloseModel(string name, string stockTicker, string date)

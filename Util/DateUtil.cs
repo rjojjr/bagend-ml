@@ -19,6 +19,21 @@ namespace bagend_ml.Util
             return new DateTime(year, month, day);
         }
 
+        public static string GetDayOfWeek(string date)
+        {
+            DateTime dt = GetDateTimeFromString(date);
+
+            return dt.DayOfWeek.ToString();
+        }
+
+        public static bool IsWeekDay(string date)
+        {
+            DateTime dt = GetDateTimeFromString(date);
+
+            return dt.DayOfWeek != DayOfWeek.Saturday && dt.DayOfWeek != DayOfWeek.Sunday;
+        }
+
+
         public static int GetNumberOfDaysBetween(string start, string stop)
         {
             return Math.Abs(int.Parse((GetDateTimeFromString(stop) - GetDateTimeFromString(start)).TotalDays.ToString()));
@@ -34,13 +49,16 @@ namespace bagend_ml.Util
             return dateTime.Year + "-" + padNumber(dateTime.Month) + "-" + padNumber(dateTime.Day);
         }
 
-        public static IList<string> GetDatesBetween(string start, string end)
+        public static IList<string> GetWeekDayDatesBetween(string start, string end)
         {
             var dates = new List<string>();
             var date = start;
             while(CompareDateStrings(date, end) < 1)
             {
-                dates.Add(date);
+                if (IsWeekDay(date))
+                {
+                    dates.Add(date);
+                }
                 var next = GetDateTimeFromString(date).AddDays(1);
                 date = GetDateString(next);
             }
