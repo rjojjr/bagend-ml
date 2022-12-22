@@ -33,10 +33,7 @@ namespace bagend_ml.ML.MLModels
         public IList<CollectivePrediction> GetAndPersistPredictions(GetAndPersistPredictionRequest request)
         {
             var predictions = GetPredictions(request.StartDate, request.EndDate, request.ModelName);
-            _executor.execute(new ActionRunnable(() =>
-            {
-                _predictionPersistenceService.PersistPrediction(request.PredictionName, request.StockTicker, request.ModelName, DateTime.UtcNow, predictions);
-            }));
+            _predictionPersistenceService.PersistPrediction(request.PredictionName, request.StockTicker, request.ModelName, DateTime.UtcNow, predictions);
 
             return predictions;
         }
