@@ -5,20 +5,37 @@ namespace bagend_ml.ML.MLModels
 	{
 
         private readonly ModelMetaFileManager _modelMetaFileManager;
-        private IList<DefaultTickerModelEntry> _defaults;
 
         public TickerModelDefaultsManager(ModelMetaFileManager modelMetaFileManager)
         {
             _modelMetaFileManager = modelMetaFileManager;
-            _defaults = _modelMetaFileManager.GetDefaults();
+        }
+
+        public IList<DefaultTickerModelEntry> GetDefaults()
+        {
+            return _modelMetaFileManager.GetDefaults();
+        }
+
+        public DefaultTickerModelEntry? GetDefault(string tickerSymbol)
+        {
+            foreach(DefaultTickerModelEntry entry in _modelMetaFileManager.GetDefaults())
+            {
+                if(entry.TickerSymbol.Equals(tickerSymbol))
+                {
+                    return entry;
+                }
+            }
+
+            return null;
         }
 
         public void AddOrUpdateDefault(DefaultTickerModelEntry defaultEntry)
         {
-            lock (_defaults)
+            lock (this)
             {
                 var newDefaults = new List<DefaultTickerModelEntry>();
-                foreach (DefaultTickerModelEntry entry in _defaults)
+                bool added = false;
+                foreach (DefaultTickerModelEntry entry in _modelMetaFileManager.GetDefaults())
                 {
                     if (!entry.TickerSymbol.Equals(defaultEntry.TickerSymbol))
                     {
@@ -26,12 +43,17 @@ namespace bagend_ml.ML.MLModels
                     }
                     else
                     {
+                        added = true;
                         newDefaults.Add(defaultEntry);
                     }
                 }
 
+                if(!added)
+                {
+                    newDefaults.Add(defaultEntry);
+                }
+
                 _modelMetaFileManager.SaveDefaults(newDefaults);
-                _defaults = newDefaults;
             }
         }
 

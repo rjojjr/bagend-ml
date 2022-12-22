@@ -12,8 +12,7 @@ namespace bagend_ml.ML
 {
 	public class CollectiveModelBuilderService
 	{
-
-		private readonly ILogger<CollectiveModelBuilderService> _logger;
+    	private readonly ILogger<CollectiveModelBuilderService> _logger;
 		private readonly DataScraperApiRESTClient _dataScraperApiClient;
 		private readonly CollectiveModelMLEnginePlugin _collectiveModelMLEnginePlugin;
         private readonly IOptions<CollectiveModelBuilderServiceConfig> _config;
